@@ -12,7 +12,7 @@ Meteor.publish("chats-in-room", function (roomId) {
 });
 
 Meteor.methods({addChat: function (roomId, message) {
-  check(roomId, String);
+  check(roomId, String, 'for roomId');
   check(message, {
     text: String,
     timestamp: Date,
