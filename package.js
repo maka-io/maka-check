@@ -10,6 +10,8 @@ Npm.depends({
 });
 
 Package.onUse(api => {
+  api.versionsFrom(['1.10.2','2.3']);
+
   api.use('ecmascript');
   api.use('ejson');
 
