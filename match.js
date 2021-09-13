@@ -225,6 +225,8 @@ const testSubtree = (value, pattern) => {
 
       return {
         message: `Expected type of ${typeofChecks[i][1]}, received ${stringForErrorMessage(value, { onlyShowType: true })}`,
+        expected: typeofChecks[i][1],
+        received: stringForErrorMessage(value, { onlyShowType: true }),
         path: '',
       };
     }
@@ -237,6 +239,8 @@ const testSubtree = (value, pattern) => {
 
     return {
       message: `Expected null, got ${stringForErrorMessage(value)}`,
+      expected: 'null',
+      received: stringForErrorMessage(value),
       path: '',
     };
   }
@@ -249,6 +253,8 @@ const testSubtree = (value, pattern) => {
 
     return {
       message: `Expected pattern ${pattern}, got ${stringForErrorMessage(value)}`,
+      expected: pattern,
+      received: stringForErrorMessage(value),
       path: '',
     };
   }
@@ -268,6 +274,8 @@ const testSubtree = (value, pattern) => {
 
     return {
       message: `Expected type of Integer, got ${stringForErrorMessage(value)}`,
+      expected: 'Integer',
+      received: stringForErrorMessage(value),
       path: '',
     };
   }
@@ -282,6 +290,8 @@ const testSubtree = (value, pattern) => {
     if (pattern.length !== 1) {
       return {
         message: `Bad pattern: arrays must have one type element ${stringForErrorMessage(pattern)}`,
+        expected: `[${typeof pattern}]`,
+        received: stringForErrorMessage(pattern),
         path: '',
       };
     }
@@ -289,6 +299,8 @@ const testSubtree = (value, pattern) => {
     if (!Array.isArray(value) && !isArguments(value)) {
       return {
         message: `Expected type of Array, got ${stringForErrorMessage(value)}`,
+        expected: 'Array',
+        received: stringForErrorMessage(value),
         path: '',
       };
     }
@@ -328,6 +340,8 @@ const testSubtree = (value, pattern) => {
     // XXX this error is terrible
     return {
       message: 'Failed Match.Where validation',
+      expected: 'Where',
+      received: 'Unknown',
       path: '',
     };
   }
@@ -350,9 +364,29 @@ const testSubtree = (value, pattern) => {
       // Match errors just mean try another choice.
     }
 
+    const testResults = pattern.choices.map((choice) => {
+      return testSubtree(value, choice);
+    });
+
+    if (testResults.length === 0) {
+      return false;
+    } else {
+      let received = '';
+      let expected = testResults.map((result) => {
+        received = result.received;
+        return result.expected;
+      });
+      return {
+        message: `Expected type of "${expected.join(' or ')}", received type of "${received}"`,
+        expected,
+        received,
+        path: ''
+      }
+    }
+
     // XXX this error is terrible
     return {
-      message: 'Failed Match.OneOf, Match.Maybe or Match.Optional validation',
+      message: `Failed Match of ${pattern.choices}`,
       path: '',
     };
   }
