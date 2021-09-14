@@ -36,7 +36,7 @@ export function check(value, pattern, msg) {
   if (result) {
     const err = new Match.Error((msg) ? `${result.message}, ${msg}` : result.message);
     if (result.path) {
-      err.message += ` in proptery field "${result.path}"`;
+      err.message += ` in property field "${result.path}"`;
       err.path = result.path;
     }
 
@@ -80,12 +80,12 @@ export const Match = {
   // XXX matchers should know how to describe themselves for errors
   Error: Meteor.makeErrorType('Match.Error', function (msg) {
     const errorTag = uuidv4();
-    this.message = `Check/Match \n\t${msg}`;
+    this.message = `Check/Match Exception\n\t[!] ${msg}`;
 
     this.details = errorTag;
 
     // The path of the value that failed to match. Initially empty, this gets
-    // populated by catching and rethrowing the exception as it goes back up the
+    // populated by catching and re throwing the exception as it goes back up the
     // stack.
     // E.g.: "vals[3].entity.created"
     this.path = '';
@@ -224,7 +224,7 @@ const testSubtree = (value, pattern) => {
       }
 
       return {
-        message: `Expected type of ${typeofChecks[i][1]}, received ${stringForErrorMessage(value, { onlyShowType: true })}`,
+        message: `Expected type of "${typeofChecks[i][1]}", received type of "${stringForErrorMessage(value, { onlyShowType: true })}"`,
         expected: typeofChecks[i][1],
         received: stringForErrorMessage(value, { onlyShowType: true }),
         path: '',
@@ -238,7 +238,7 @@ const testSubtree = (value, pattern) => {
     }
 
     return {
-      message: `Expected null, got ${stringForErrorMessage(value)}`,
+      message: `Expected null input, received "${stringForErrorMessage(value)}"`,
       expected: 'null',
       received: stringForErrorMessage(value),
       path: '',
@@ -252,7 +252,7 @@ const testSubtree = (value, pattern) => {
     }
 
     return {
-      message: `Expected pattern ${pattern}, got ${stringForErrorMessage(value)}`,
+      message: `Expected pattern "${pattern}", received "${stringForErrorMessage(value)}"`,
       expected: pattern,
       received: stringForErrorMessage(value),
       path: '',
@@ -273,7 +273,7 @@ const testSubtree = (value, pattern) => {
     }
 
     return {
-      message: `Expected type of Integer, got ${stringForErrorMessage(value)}`,
+      message: `Expected type of "Integer", received type of "${stringForErrorMessage(value)}"`,
       expected: 'Integer',
       received: stringForErrorMessage(value),
       path: '',
@@ -298,7 +298,7 @@ const testSubtree = (value, pattern) => {
 
     if (!Array.isArray(value) && !isArguments(value)) {
       return {
-        message: `Expected type of Array, got ${stringForErrorMessage(value)}`,
+        message: `Expected type of "Array", received type of "${stringForErrorMessage(value)}"`,
         expected: 'Array',
         received: stringForErrorMessage(value),
         path: '',
@@ -399,7 +399,7 @@ const testSubtree = (value, pattern) => {
     }
 
     return {
-      message: `Expected ${pattern.name ?? 'particular constructor'}`,
+      message: `Expected "${pattern.name ?? 'particular constructor'}"`,
       path: '',
     };
   }
@@ -429,14 +429,14 @@ const testSubtree = (value, pattern) => {
   // the pattern: this really needs to be a plain old {Object}!
   if (typeof value !== 'object') {
     return {
-      message: `Expected type of Object, got ${typeof value}`,
+      message: `Expected type of "Object", received type of "${typeof value}"`,
       path: '',
     };
   }
 
   if (value === null) {
     return {
-      message: `Expected type of Object, got null`,
+      message: `Expected type of "Object, received null`,
       path: '',
     };
   }
@@ -481,7 +481,7 @@ const testSubtree = (value, pattern) => {
     } else {
       if (!unknownKeysAllowed) {
         return {
-          message: 'Unknown key',
+          message: 'Unknown input key/value pair',
           path: key,
         };
       }
@@ -499,7 +499,7 @@ const testSubtree = (value, pattern) => {
   const keys = Object.keys(requiredPatterns);
   if (keys.length) {
     return {
-      message: `Missing key '${keys[0]}'`,
+      message: `Missing input key/value pair "${keys[0]}"`,
       path: '',
     };
   }

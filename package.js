@@ -1,7 +1,7 @@
 Package.describe({
   name: 'maka:check',
   summary: 'Enhanced version of Meteor Check.',
-  version: '1.3.2',
+  version: '1.3.3',
   git: 'https://github.com/maka-io/maka-check.git'
 });
 
