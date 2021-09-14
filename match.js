@@ -57,6 +57,10 @@ export const Match = {
     return new Maybe(pattern);
   },
 
+  Nullable: function(pattern) {
+    return new Nullable(pattern)
+  },
+
   OneOf: function(...args) {
     return new OneOf(args);
   },
@@ -135,6 +139,12 @@ class Optional {
 }
 
 class Maybe {
+  constructor(pattern) {
+    this.pattern = pattern;
+  }
+}
+
+class Nullable {
   constructor(pattern) {
     this.pattern = pattern;
   }
@@ -348,6 +358,8 @@ const testSubtree = (value, pattern) => {
 
   if (pattern instanceof Maybe) {
     pattern = Match.OneOf(undefined, null, pattern.pattern);
+  } else if (pattern instanceof Nullable) {
+    pattern = Match.OneOf(null, pattern.pattern);
   } else if (pattern instanceof Optional) {
     pattern = Match.OneOf(undefined, pattern.pattern);
   }
@@ -449,6 +461,7 @@ const testSubtree = (value, pattern) => {
   }
 
   const requiredPatterns = Object.create(null);
+  const nullablePatterns = Object.create(null);
   const optionalPatterns = Object.create(null);
 
   Object.keys(pattern).forEach(key => {
@@ -456,6 +469,8 @@ const testSubtree = (value, pattern) => {
     if (subPattern instanceof Optional ||
         subPattern instanceof Maybe) {
       optionalPatterns[key] = subPattern;
+    } else if (subPattern instanceof Nullable) {
+      nullablePatterns[key] = subPattern;
     } else {
       requiredPatterns[key] = subPattern;
     }
@@ -464,6 +479,7 @@ const testSubtree = (value, pattern) => {
   for (let key in Object(value)) {
     const subValue = value[key];
     if (hasOwn.call(requiredPatterns, key)) {
+
       const result = testSubtree(subValue, requiredPatterns[key]);
       if (result) {
         result.path = _prependPath(key, result.path);
@@ -471,7 +487,17 @@ const testSubtree = (value, pattern) => {
       }
 
       delete requiredPatterns[key];
+    } else if (hasOwn.call(nullablePatterns, key)) {
+
+      const result = testSubtree(subValue, nullablePatterns[key]);
+      if (result) {
+        result.path = _prependPath(key, result.path);
+        return result;
+      }
+
+      delete nullablePatterns[key];
     } else if (hasOwn.call(optionalPatterns, key)) {
+
       const result = testSubtree(subValue, optionalPatterns[key]);
       if (result) {
         result.path = _prependPath(key, result.path);
@@ -496,10 +522,18 @@ const testSubtree = (value, pattern) => {
     }
   }
 
-  const keys = Object.keys(requiredPatterns);
-  if (keys.length) {
+  const requiredKeys = Object.keys(requiredPatterns);
+  if (requiredKeys.length) {
     return {
-      message: `Missing input key/value pair "${keys[0]}"`,
+      message: `Missing non-nullable input key/value pair(s) "${requiredKeys}"`,
+      path: '',
+    };
+  }
+
+  const nullableKeys = Object.keys(nullablePatterns);
+  if (nullableKeys.length) {
+    return {
+      message: `Missing nullable input key/value pair(s) "${nullableKeys}"`,
       path: '',
     };
   }
