@@ -1,6 +1,15 @@
 # check
-[Source code of released version](https://github.com/meteor/meteor/tree/master/packages/check) | [Source code of development version](https://github.com/meteor/meteor/tree/devel/packages/check)
 ***
+
+The Check package has had problems with "Match.Maybe" and "Match.Optional" for a very long time.  Several
+issues have been raised, but none get resolved.  I aim to resolve them here.
+
+Match.Maybe now correctly checks against against undefined and null, and Match.Optional check against undefined.
+
+I plan to OBE Match.Maybe in favor of "Match.Nullable" and only allow a check against null.
+
+I've also improved (I think) the error messages.
+
 
 `check` is a lightweight package for argument checking and general pattern matching. Use it like this:
 
